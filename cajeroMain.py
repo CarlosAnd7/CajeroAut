@@ -51,6 +51,8 @@ def menu_administrador():
                 return
             case "1":
                 creaCuenta()
+            case "2":
+                eliminarCuenta()
 
 
 def creaCuenta():
@@ -103,7 +105,7 @@ def iniciar_sesion_usuario():
                               "0.- Salir \n"
                               "1.- Reintentar")
                 if salir == '0':
-                    break  # Salir del bucle
+                    return
                 elif salir == '1':
                     iniciar_sesion()
                 else:
@@ -119,7 +121,7 @@ def menu_usuario():
 
         match opcMenuUsr:
             case "0":
-                break
+                return
             case "1":
                 deposito()
             case "2":
