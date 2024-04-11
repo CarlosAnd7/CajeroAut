@@ -12,23 +12,23 @@ def iniciar_sesion():
 
         match tipo_usuario:
             case "1":
-                iniciar_sesion_usuario()
+                iniciarSesionUsuario()
             case "2":
-                iniciar_sesion_administrador()
+                iniciarSesionAdmin()
             case "0":
                 exit()
 
 
-def iniciar_sesion_administrador():
+def iniciarSesionAdmin():
     while True:
         nip_admin = input("Bienvenido Administrador\n"
                           "Ingresa tu NIP (o '0' para volver atrás): ")
         if nip_admin == "0000":
-            menu_administrador()
+            menuAdmin()
         elif nip_admin == "0":
             return
         else:
-            mostrar_error("No coincide el NIP. Intentalo de nuevo")
+            mostrarError("No coincide el NIP. Intentalo de nuevo")
             while True:
                 salir = input("Deseas regresar al menu anterior?\n"
                               "0.- Salir \n"
@@ -38,7 +38,7 @@ def iniciar_sesion_administrador():
                 else:
                     pass
 
-def menu_administrador():
+def menuAdmin():
     while True:
         print("0.- Cerrar Sesión\n"
               "1.- Crear cuenta\n"
@@ -89,7 +89,7 @@ def verificarNIP(numero_cuenta, nip):
     else:
         return False
 
-def iniciar_sesion_usuario():
+def iniciarSesionUsuario():
     while True:
         cuentaUsr = input("Bienvenido Usuario\n"
                           "Ingresa tu numero de cuenta: ")
@@ -97,9 +97,9 @@ def iniciar_sesion_usuario():
         nipUsr = input("Ingresa tu numero de NIP: ")
 
         if(verificarNIP(cuentaUsr,nipUsr)):
-            menu_usuario(cuentaUsr)
+            menuUsuario(cuentaUsr)
         else:
-            mostrar_error("No coincide el NIP. Intentalo de nuevo")
+            mostrarError("No coincide el NIP. Intentalo de nuevo")
             while True:
                 salir = input("Deseas regresar al menu anterior?\n"
                               "0.- Salir \n"
@@ -109,8 +109,8 @@ def iniciar_sesion_usuario():
                 elif salir == '1':
                     iniciar_sesion()
                 else:
-                    print("Opción inválida. Por favor, elige 0 o 1.")
-def menu_usuario(cuentaUsr):
+                    mostrarError("Opción inválida. Por favor, elige 0 o 1.")
+def menuUsuario(cuentaUsr):
 
     while True:
         opcMenuUsr= input("Bienvenido al menu de Usuario \n"
@@ -130,16 +130,11 @@ def menu_usuario(cuentaUsr):
                 cambiarNIP(cuentaUsr)
 
 
-
-def operaciones_billetes(tipo_operacion, cantidad):
-    # Aquí deberías implementar la lógica para operaciones con billetes (retirar/depositar)
-    pass
-
 def realizarDeposito(cuentaUsr):
     cantidad_deposito = int(input("Ingrese la cantidad que desea depositar: "))
 
     if cantidad_deposito <= 0:
-        print("La cantidad ingresada no es válida.")
+        mostrarError("La cantidad ingresada no es válida.")
         return
 
     # Actualizar el saldo de la cuenta
@@ -165,7 +160,7 @@ def realizarDeposito(cuentaUsr):
         print("Disponibilidad de billetes actualizada:")
         print(efectivoDisponible)
     else:
-        print("No es posible depositar esa cantidad con los billetes disponibles.")
+        mostrarError("No es posible depositar esa cantidad con los billetes disponibles.")
 
 def deposito(cuentaUsr):
     while True:
@@ -176,10 +171,9 @@ def deposito(cuentaUsr):
         if opcion == "1":
             realizarDeposito(cuentaUsr)
         elif opcion == "2":
-            print("Saliendo del programa...")
-            break
+            return
         else:
-            print("Opción no válida. Por favor seleccione 1 o 2.")
+            mostrarError("Opción no válida. Por favor seleccione 1 o 2.")
 
 
 def evaluaBilletes():
@@ -191,7 +185,7 @@ def retirarEfectivo(opcRet, cuentaUsr):
     saldo = cuentasDebito[cuentaUsr]["Saldo"]
 
     if opcRet > saldo:
-        print("No tienes suficiente saldo en tu cuenta.")
+        mostrarError("No tienes suficiente saldo en tu cuenta.")
         return
 
     billetes_disponibles = sorted(efectivoDisponible.keys(), reverse=True)
@@ -213,7 +207,7 @@ def retirarEfectivo(opcRet, cuentaUsr):
         cuentasDebito[cuentaUsr]["Saldo"] -= cantidad*denominacion
 
     else:
-        print("No se puede retirar la cantidad solicitada con los billetes disponibles.")
+        mostrarError("No se puede retirar la cantidad solicitada con los billetes disponibles.")
 
     print("Lista de billetes disponibles después del retiro:")
     print(efectivoDisponible)
@@ -237,12 +231,11 @@ def retiro(cuentaUsr):
                 else:
                     print("No se admiten retiros mayores a 8000")
             else:
-                mostrar_error("NIP incorrecto")
+                mostrarError("NIP incorrecto")
         elif opcion == "2":
-            print("Saliendo del programa...")
-            break
+            return
         else:
-            print("Opción no válida. Por favor selecciona 1 o 2.")
+            mostrarError("Opción no válida. Por favor selecciona 1 o 2.")
 
 
 def cambiarNIP(numeroCuenta):
@@ -251,9 +244,9 @@ def cambiarNIP(numeroCuenta):
         cuentasDebito[numeroCuenta]['NIP'] = nuevoNIP
         print("El NIP de la cuenta " + numeroCuenta + " se ha cambiado correctamente.")
     else:
-        print("La cuenta con el número " + numeroCuenta + " no existe.")
+        mostrarError("La cuenta con el número " + numeroCuenta + " no existe.")
 
-def mostrar_error(mensaje):
+def mostrarError(mensaje):
     print("Error:", mensaje)
 
 iniciar_sesion()
