@@ -102,14 +102,18 @@ def verificarNIP(numero_cuenta, nip):
 def iniciarSesionUsuario():
     while True:
         cuentaUsr = input("Bienvenido Usuario\n"
-                          "Ingresa tu numero de cuenta: ")
+                          "Ingresa tu numero de cuenta (o '0' para salir): ")
 
-        nipUsr = input("Ingresa tu numero de NIP: ")
-
-        if verificarNIP(cuentaUsr, nipUsr):
-            menuUsuario(cuentaUsr)
+        if cuentaUsr == "0":
+            return
         else:
-            mostrarError("No coincide el NIP. Inténtalo de nuevo")
+            nipUsr = input("Ingresa tu numero de NIP: ")
+
+            if verificarNIP(cuentaUsr, nipUsr):
+                menuUsuario(cuentaUsr)
+            else:
+                mostrarError("No coincide el NIP. Inténtalo de nuevo")
+
 
 
 def menuUsuario(cuentaUsr):
