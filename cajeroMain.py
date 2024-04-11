@@ -1,6 +1,6 @@
 # Estructuras de datos
 cuentasDebito = {}  # Diccionario para almacenar las cuentas de débito
-efectivoDisponible = {100: 10, 200: 10, 500: 10, 1000: 10}  # Diccionario para almacenar el efectivo disponible
+efectivoDisponible = {20: 10,50: 10,100: 10, 200: 10, 500: 10, 1000: 10}  # Diccionario para almacenar el efectivo disponible
 
 # Funciones
 def iniciar_sesion():
@@ -97,7 +97,7 @@ def iniciar_sesion_usuario():
         nipUsr = input("Ingresa tu numero de NIP: ")
 
         if(verificarNIP(cuentaUsr,nipUsr)):
-            menu_usuario()
+            menu_usuario(cuentaUsr)
         else:
             mostrar_error("No coincide el NIP. Intentalo de nuevo")
             while True:
@@ -110,7 +110,7 @@ def iniciar_sesion_usuario():
                     iniciar_sesion()
                 else:
                     print("Opción inválida. Por favor, elige 0 o 1.")
-def menu_usuario():
+def menu_usuario(cuentaUsr):
 
     while True:
         opcMenuUsr= input("Bienvenido al menu de Usuario \n"
@@ -123,11 +123,11 @@ def menu_usuario():
             case "0":
                 return
             case "1":
-                deposito()
+                deposito(cuentaUsr)
             case "2":
-                retiro()
+                retiro(cuentaUsr)
             case "3":
-                cambiarNIP()
+                cambiarNIP(cuentaUsr)
 
 
 
@@ -135,12 +135,123 @@ def operaciones_billetes(tipo_operacion, cantidad):
     # Aquí deberías implementar la lógica para operaciones con billetes (retirar/depositar)
     pass
 
-def deposito():
-    pass
-def retiro():
-    pass
-def cambiarNIP():
-    pass
+def realizarDeposito(cuentaUsr):
+    cantidad_deposito = int(input("Ingrese la cantidad que desea depositar: "))
+
+    if cantidad_deposito <= 0:
+        print("La cantidad ingresada no es válida.")
+        return
+
+    # Actualizar el saldo de la cuenta
+    cuentasDebito[cuentaUsr]["Saldo"] += cantidad_deposito
+
+    # Actualizar la disponibilidad de billetes
+    billetes_disponibles = sorted(efectivoDisponible.keys(), reverse=True)
+    billetes_a_depositar = {}
+
+    monto_restante = cantidad_deposito
+    for denominacion in billetes_disponibles:
+        cantidad_billetes = monto_restante // denominacion
+        if cantidad_billetes > 0 and efectivoDisponible[denominacion] >= cantidad_billetes:
+            billetes_a_depositar[denominacion] = cantidad_billetes
+            monto_restante -= cantidad_billetes * denominacion
+
+    if monto_restante == 0:
+        # Actualizar la disponibilidad de billetes
+        for denominacion, cantidad in billetes_a_depositar.items():
+            efectivoDisponible[denominacion] += cantidad
+        print(f"Se ha depositado ${cantidad_deposito} en la cuenta.")
+        print("Nuevo saldo:", cuentasDebito[cuentaUsr]["Saldo"])
+        print("Disponibilidad de billetes actualizada:")
+        print(efectivoDisponible)
+    else:
+        print("No es posible depositar esa cantidad con los billetes disponibles.")
+
+def deposito(cuentaUsr):
+    while True:
+        print("1. Realizar depósito")
+        print("2. Salir")
+        opcion = input("Seleccione una opción: ")
+
+        if opcion == "1":
+            realizarDeposito(cuentaUsr)
+        elif opcion == "2":
+            print("Saliendo del programa...")
+            break
+        else:
+            print("Opción no válida. Por favor seleccione 1 o 2.")
+
+
+def evaluaBilletes():
+    for x in efectivoDisponible:
+        if efectivoDisponible[x] != 0:
+            return x
+
+def retirarEfectivo(opcRet, cuentaUsr):
+    saldo = cuentasDebito[cuentaUsr]["Saldo"]
+
+    if opcRet > saldo:
+        print("No tienes suficiente saldo en tu cuenta.")
+        return
+
+    billetes_disponibles = sorted(efectivoDisponible.keys(), reverse=True)
+    retirados = {}
+
+    for denominacion in billetes_disponibles:
+        if opcRet >= denominacion and efectivoDisponible[denominacion] > 0:
+            cantidad_a_retirar = min(opcRet // denominacion, efectivoDisponible[denominacion])
+            retirados[denominacion] = cantidad_a_retirar
+            opcRet -= denominacion * cantidad_a_retirar
+
+    if opcRet == 0:
+        print("Retirando billetes:")
+        for denominacion, cantidad in retirados.items():
+            print(f"{cantidad} billete(s) de ${denominacion}")
+            efectivoDisponible[denominacion] -= cantidad
+
+        # Actualizar el saldo de la cuenta
+        cuentasDebito[cuentaUsr]["Saldo"] -= cantidad*denominacion
+
+    else:
+        print("No se puede retirar la cantidad solicitada con los billetes disponibles.")
+
+    print("Lista de billetes disponibles después del retiro:")
+    print(efectivoDisponible)
+    print("Saldo actual:", cuentasDebito[cuentaUsr]["Saldo"])
+
+
+def retiro(cuentaUsr):
+    while True:
+        print("Billetes desde $" + str(evaluaBilletes()) + " disponibles")
+        print("1. Realizar retiro")
+        print("2. Salir")
+        opcion = input("Selecciona una opción: ")
+
+        if opcion == "1":
+            opcRet = int(input("¿Qué cantidad deseas retirar? "))
+            confirmaNIP = input("Ingresa tu NIP para validar la transacción: ")
+
+            if verificarNIP(cuentaUsr, confirmaNIP):
+                if opcRet <= 8000:
+                    retirarEfectivo(opcRet,cuentaUsr)
+                else:
+                    print("No se admiten retiros mayores a 8000")
+            else:
+                mostrar_error("NIP incorrecto")
+        elif opcion == "2":
+            print("Saliendo del programa...")
+            break
+        else:
+            print("Opción no válida. Por favor selecciona 1 o 2.")
+
+
+def cambiarNIP(numeroCuenta):
+    if numeroCuenta in cuentasDebito:
+        nuevoNIP = input("Ingresa el nuevo NIP para la cuenta " + numeroCuenta + ": ")
+        cuentasDebito[numeroCuenta]['NIP'] = nuevoNIP
+        print("El NIP de la cuenta " + numeroCuenta + " se ha cambiado correctamente.")
+    else:
+        print("La cuenta con el número " + numeroCuenta + " no existe.")
 
 def mostrar_error(mensaje):
     print("Error:", mensaje)
