@@ -16,64 +16,66 @@ cuentasDebito = {
         "Nombre": "Pedro Rodriguez"
     }
 }
-
-def verificarNIP(numero_cuenta, nip):
-    cuenta = cuentasDebito.get(numero_cuenta)
-    if cuenta and cuenta["NIP"] == nip:
-        return True
-    else:
-        return False
-
-def evaluaBilletes():
-    for x in efectivoDisponible:
-        if efectivoDisponible[x] != 0:
-            return x
-def realizarDeposito(cuentaUsr):
-    cantidad_deposito = int(input("Ingrese la cantidad que desea depositar: "))
-
-    if cantidad_deposito <= 0:
-        print("La cantidad ingresada no es válida.")
+def billetes(cuentaUsr, cantidad, tipo_operacion):
+    if cantidad <= 0:
+        mostrarError("La cantidad ingresada no es válida.")
         return
 
-    # Actualizar el saldo de la cuenta
-    cuentasDebito[cuentaUsr]["Saldo"] += cantidad_deposito
+    saldo = cuentasDebito[cuentaUsr]["Saldo"]
 
-    # Actualizar la disponibilidad de billetes
+    if tipo_operacion == "retiro" and cantidad > saldo:
+        mostrarError("No tienes suficiente saldo en tu cuenta.")
+        return
+
     billetes_disponibles = sorted(efectivoDisponible.keys(), reverse=True)
-    billetes_a_depositar = {}
+    operacion_exitosa = False
+    monto_restante = cantidad
 
-    monto_restante = cantidad_deposito
-    for denominacion in billetes_disponibles:
-        cantidad_billetes = monto_restante // denominacion
-        if cantidad_billetes > 0 and efectivoDisponible[denominacion] >= cantidad_billetes:
-            billetes_a_depositar[denominacion] = cantidad_billetes
-            monto_restante -= cantidad_billetes * denominacion
-
-    if monto_restante == 0:
-        # Actualizar la disponibilidad de billetes
-        for denominacion, cantidad in billetes_a_depositar.items():
-            efectivoDisponible[denominacion] += cantidad
-        print(f"Se ha depositado ${cantidad_deposito} en la cuenta.")
-        print("Nuevo saldo:", cuentasDebito[cuentaUsr]["Saldo"])
-        print("Disponibilidad de billetes actualizada:")
-        print(efectivoDisponible)
+    if tipo_operacion == "retiro":
+        operacion_exitosa = True
+        retirados = {}
     else:
-        print("No es posible depositar esa cantidad con los billetes disponibles.")
+        billetes_a_depositar = {}
 
-def deposito(cuentaUsr):
-    while True:
-        print("1. Realizar depósito")
-        print("2. Salir")
-        opcion = input("Seleccione una opción: ")
+    for denominacion in billetes_disponibles:
+        if tipo_operacion == "retiro":
+            if cantidad >= denominacion and efectivoDisponible[denominacion] > 0:
+                cantidad_a_retirar = min(cantidad // denominacion, efectivoDisponible[denominacion])
+                retirados[denominacion] = cantidad_a_retirar
+                cantidad -= denominacion * cantidad_a_retirar
+                efectivoDisponible[denominacion] -= cantidad_a_retirar
+                saldo -= denominacion * cantidad_a_retirar
+        else:  # Depósito
+            cantidad_billetes = monto_restante // denominacion
+            if cantidad_billetes > 0:
+                billetes_a_depositar[denominacion] = cantidad_billetes
+                monto_restante -= denominacion * cantidad_billetes
+                efectivoDisponible[denominacion] += cantidad_billetes
+                saldo += denominacion * cantidad_billetes
 
-        if opcion == "1":
-            realizarDeposito(cuentaUsr)
-        elif opcion == "2":
-            print("Saliendo del programa...")
-            break
+    if tipo_operacion == "retiro":
+        if cantidad == 0:
+            print("Operación exitosa. Retirando billetes:")
+            for denominacion, cantidad in retirados.items():
+                print(f"{cantidad} billete(s) de ${denominacion}")
+            cuentasDebito[cuentaUsr]["Saldo"] = saldo
+            operacion_exitosa = True
         else:
-            print("Opción no válida. Por favor seleccione 1 o 2.")
-def mostrar_error(mensaje):
+            mostrarError("No se puede retirar la cantidad solicitada con los billetes disponibles.")
+    else:  # Depósito
+        if monto_restante == 0:
+            print("Operación exitosa. Se ha depositado la cantidad en la cuenta.")
+            cuentasDebito[cuentaUsr]["Saldo"] = saldo
+        else:
+            mostrarError("No es posible depositar esa cantidad con los billetes disponibles.")
+
+    print("Lista de billetes disponibles:")
+    print(efectivoDisponible)
+    print("Saldo actual:", cuentasDebito[cuentaUsr]["Saldo"])
+
+def mostrarError(mensaje):
     print("Error:", mensaje)
 
-deposito("1234567890")
+# Ejemplo de uso:
+billetes("1234567890", 1000, "retiro")
+billetes("1234567890", 900, "deposito")
