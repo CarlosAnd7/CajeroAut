@@ -139,16 +139,18 @@ def menuUsuario(cuentaUsr):
 def realizarOperacion(cuentaUsr, tipo_operacion):
     nipOp = input("Ingresa tu NIP para validar la operacion: ")
     if verificarNIP(cuentaUsr, nipOp):
-
         if tipo_operacion == "retiro":
             monto_operacion = int(input("Ingrese la cantidad que desea retirar: "))
-            saldo = cuentasDebito[cuentaUsr]["Saldo"]
-
-            if monto_operacion > saldo:
-                mostrarError("No tienes suficiente saldo en tu cuenta.")
+            if(monto_operacion > 8000):
+                mostrarError("No es posible hacer retiros mayores a 8000 en el cajero automatico")
                 return
             else:
-                cuentasDebito[cuentaUsr]["Saldo"] -= monto_operacion
+                saldo = cuentasDebito[cuentaUsr]["Saldo"]
+                if monto_operacion > saldo:
+                    mostrarError("No tienes suficiente saldo en tu cuenta.")
+                    return
+                else:
+                    cuentasDebito[cuentaUsr]["Saldo"] -= monto_operacion
         elif tipo_operacion == "deposito":
             monto_operacion = int(input("Ingrese la cantidad que desea depositar: "))
             cuentasDebito[cuentaUsr]["Saldo"] += monto_operacion
